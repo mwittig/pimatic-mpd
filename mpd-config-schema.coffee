@@ -1,11 +1,11 @@
-# #my-plugin configuration options
+# #pimatic-mpd configuration options
 # Declare your config option for your plugin here. 
 module.exports = {
-  title: "my plugin config options"
+  title: "pimatic-mpd config options"
   type: "object"
   properties:
-    option1:
-      description: "Some option"
-      type: "string"
-      default: "foo"
+    debug:
+      description: "Debug mode. Writes debug message to the pimatic log"
+      type: "boolean"
+      default: false
 }
