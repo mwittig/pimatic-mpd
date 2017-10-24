@@ -16,7 +16,6 @@ module.exports = (env) ->
   # ###MpdPlugin class
   class MpdPlugin extends env.plugins.Plugin
 
-
     init: (app, @framework, @config) ->
 
       deviceConfigDef = require("./device-config-schema")
@@ -36,17 +35,41 @@ module.exports = (env) ->
       @_connect()
       super()
 
+    destroy: () ->
+      @_cancelReconnect()
+      if @_client?
+        # we need to remove event listeners as a spurious close or error event
+        # may create another connection
+        @_client.removeAllListeners()
+        # add an empty error handler just in case the the mpd client raises an error event
+        # which might occur as it is not possible to orderly close the connection
+        @_client.on("error", ->)
+        # make sure socket connection gets closed as the client object won't be
+        # removed otherwise
+        @_client.socket.destroy()
+      super()
+
     _connect: () ->
       env.logger.debug("Connection to mpd #{@config.host}:#{@config.port}")
+      if @_client?
+        @_client.removeAllListeners()
+        # add an empty error handler just in case the the previous mpd client raises an error event
+        # which might occur as it is not possible to orderly close the connection
+        @_client.on("error", ->)
       @_client = mpd.connect(
         port: @config.port
         host: @config.host      
       )
-      
+
+      errorHandler = (err) =>
+        env.logger.debug("Error on connection to mpd: #{err.message}")
+        @_reconnect()
+
       @_connectionPromise = new Promise( (resolve, reject) =>
         onReady = =>
-          @_lastError = null  
+          @_lastError = null
           @_client.removeListener('error', onError)
+          @_client.on("error", => errorHandler)
           resolve()
         onError = (err) =>
           @_client.removeListener('ready', onReady)
@@ -83,8 +106,13 @@ module.exports = (env) ->
         @_reconnect()
       )
 
+    _cancelReconnect: () ->
+      clearTimeout(@_timeoutId) if @_timeoutId?
+      @_timeoutId = null
+
     _reconnect: () ->
-      setTimeout((=> @_connect()), 10000)
+      @_cancelReconnect()
+      @_timeoutId = setTimeout((=> @_timeoutId = null; @_connect()), 10000)
 
     play: () ->
       switch @_state
