@@ -9,7 +9,12 @@
   "license": "GPL-2.0",
   "contributors": [
     {
-      "name": "Tom Jans"
+      "name": "Tom Jans",
+      "url": "https://github.com/Tom-Jans"
+    },
+    {
+      "name": "Markus M.",
+      "url": "https://github.com/Xento"
     },
     {
       "name": "Marcus Wittig",
