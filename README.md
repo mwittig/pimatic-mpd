@@ -3,7 +3,7 @@ pimatic-mpd
 
 pimatic plugin for controlling the [Music Player Daemon](http://www.musicpd.org/).
 
-###device config example:
+### Device Configuration Example
 
 ```json
 {
@@ -15,7 +15,7 @@ pimatic plugin for controlling the [Music Player Daemon](http://www.musicpd.org/
 }
 ```
 
-###device rules examples:
+### Device Rule Examples
 
 <b>Play music</b><br>
 if smartphone is present then play mpd-player
